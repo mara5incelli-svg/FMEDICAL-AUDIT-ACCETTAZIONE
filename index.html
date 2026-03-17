@@ -413,21 +413,29 @@ body{font-family:Georgia,serif;background:var(--cream);color:var(--navy);min-hei
     <div class="nfoot"><button class="btn btn-out" onclick="mgo(2)">Indietro</button><button class="btn btn-dark" onclick="mgo(4)">Avanti</button></div>
   </div>
 
-  <!-- P4: Mese corrente - PDF + Excel -->
+  <!-- P4: Mese corrente - PDF + 2 Excel -->
   <div id="mp4" class="card hidden">
     <div class="card-title">Mese Corrente</div>
-    <div class="card-sub">Carica PDF e Excel del mese corrente.</div>
-    <div class="lbl">PDF Laboratorio (totale accettazioni)</div>
+    <div class="card-sub">Carica i 3 file per calcolare automaticamente i dati del mese corrente.</div>
+    <div class="lbl">1. PDF Laboratorio (totale accettazioni)</div>
     <div class="drop-zone"><input type="file" accept=".pdf" onchange="onMPdfCurr(this)">
       <span class="drop-icon">&#128196;</span>
       <div class="drop-lbl">PDF mese corrente</div>
-      <div class="drop-hint">.pdf</div>
+      <div class="drop-hint">.pdf - Operazioni per Branca</div>
     </div>
     <span class="fstatus" id="mfs-pcurr">In attesa</span>
-    <div class="lbl" style="margin-top:.75rem">Excel (assicurati e altre aree)</div>
+    <div class="lbl" style="margin-top:.75rem">2. Excel Laboratorio (assicurati fondi)</div>
+    <div class="drop-zone"><input type="file" accept=".xlsx,.xls" onchange="onMXlsLabCurr(this)">
+      <span class="drop-icon">&#128202;</span>
+      <div class="drop-lbl">Export.xlsx - Laboratorio Analisi</div>
+      <div class="drop-hint">.xlsx - per calcolare assicurati lab</div>
+    </div>
+    <span class="fstatus" id="mfs-xlab-curr">In attesa</span>
+    <span class="fstatus hidden" id="mst-lab-ok"></span>
+    <div class="lbl" style="margin-top:.75rem">3. Excel generale (Fisio, Poli, Radiologia)</div>
     <div class="drop-zone"><input type="file" accept=".xlsx,.xls" onchange="onMXlsCurr(this)">
       <span class="drop-icon">&#128202;</span>
-      <div class="drop-lbl">Export.xlsx mese corrente</div>
+      <div class="drop-lbl">Export generale - tutte le aree</div>
       <div class="drop-hint">.xlsx</div>
     </div>
     <span class="fstatus" id="mfs-xcurr">In attesa</span>
@@ -1048,6 +1056,31 @@ async function onMXlsCurr(inp){
   }catch(e){setMStatus('mfs-xcurr',false,'Errore: '+e.message);}
 }
 
+
+async function onMXlsLabCurr(inp){
+  var f=inp.files[0];if(!f)return;
+  if(typeof XLSX==='undefined'){alert('Excel non disponibile. Ricarica la pagina.');return;}
+  setMStatus('mfs-xlab-curr','','Lettura...');
+  try{
+    var buf=await f.arrayBuffer();
+    var wb=XLSX.read(buf,{type:'array'});
+    var rows=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{header:1});
+    var hdr=rows[0].map(function(h){return (h||'').toString().toLowerCase();});
+    var cA=hdr.findIndex(function(h){return h.includes('assegnazione');});
+    var cL=hdr.findIndex(function(h){return h.includes('listino');});
+    if(cA<0||cL<0)throw new Error('Colonne non trovate');
+    var ass=new Set();
+    for(var i=1;i<rows.length;i++){
+      var r=rows[i];
+      if(r&&r[cL]&&isFondo((r[cL]||'').toString()))ass.add(r[cA]);
+    }
+    MFS.labAss=ass.size;
+    setMStatus('mfs-xlab-curr',true,'OK - Assicurati Lab: '+ass.size);
+    var el=document.getElementById('mst-lab-ok');
+    if(el){el.textContent='Lab assicurati: '+ass.size;el.className='fstatus ok';el.classList.remove('hidden');}
+    aggiornaMenseCurr();
+  }catch(e){setMStatus('mfs-xlab-curr',false,'Errore: '+e.message);}
+}
 function aggiornaMenseCurr(){
   if(MFS.labTot!==null&&MFS.labAss!==null){
     var labPriv=MFS.labTot-MFS.labAss;
