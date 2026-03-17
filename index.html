@@ -199,16 +199,16 @@ body{font-family:Georgia,serif;background:var(--cream);color:var(--navy);min-hei
     <div class="nfoot"><button class="btn btn-out" onclick="go(1)">Indietro</button><button class="btn btn-dark" onclick="go(3)">Avanti</button></div>
   </div>
 
-  <!-- P3: Settimana precedente - DOCX -->
+  <!-- P3: Settimana precedente - incolla testo audit -->
   <div id="p3" class="card hidden">
     <div class="card-title">Settimana Precedente</div>
-    <div class="card-sub">Carica il .docx dell'audit della settimana scorsa. I dati vengono estratti automaticamente.</div>
-    <div class="drop-zone"><input type="file" accept=".docx" onchange="onDocxPrev(this)">
-      <span class="drop-icon">&#128196;</span>
-      <div class="drop-lbl">Audit settimana precedente (.docx)</div>
-      <div class="drop-hint">.docx</div>
+    <div class="card-sub">Incolla il testo dell'audit della settimana scorsa. I dati vengono estratti automaticamente.</div>
+    <textarea id="prev-audit-text" style="width:100%;height:200px;border:1px solid var(--border);border-radius:8px;padding:1rem;font-size:12px;font-family:monospace;background:var(--cream);color:var(--navy);resize:vertical;line-height:1.6" placeholder="Incolla qui il testo dell'audit della settimana precedente..."></textarea>
+    <div class="brow">
+      <button class="btn btn-dark" onclick="estraiPrev()">Estrai dati</button>
+      <button class="btn btn-out" onclick="document.getElementById('prev-audit-text').value=''">Cancella</button>
     </div>
-    <span class="fstatus" id="fs-docx">In attesa del file</span>
+    <span class="fstatus" id="fs-prev-text">In attesa del testo</span>
     <div class="lbl" style="margin-top:1rem">Verifica o modifica</div>
     <div class="row3">
       <div class="fld"><label>Totale</label><input type="number" id="pv_tot" placeholder="0"></div>
@@ -392,24 +392,16 @@ body{font-family:Georgia,serif;background:var(--cream);color:var(--navy);min-hei
     <div class="nfoot"><button class="btn btn-out" onclick="mgo(1)">Indietro</button><button class="btn btn-dark" onclick="mgo(3)">Avanti</button></div>
   </div>
 
-  <!-- P3: Mese precedente - PDF + Excel -->
+  <!-- P3: Mese precedente - incolla testo report -->
   <div id="mp3" class="card hidden">
     <div class="card-title">Mese Precedente</div>
-    <div class="card-sub">Carica PDF e Excel del mese scorso per calcolare i confronti.</div>
-    <div class="lbl">PDF Laboratorio (totale accettazioni)</div>
-    <div class="drop-zone"><input type="file" accept=".pdf" onchange="onMPdfPrev(this)">
-      <span class="drop-icon">&#128196;</span>
-      <div class="drop-lbl">PDF mese precedente</div>
-      <div class="drop-hint">.pdf</div>
+    <div class="card-sub">Incolla il testo del report mensile del mese scorso. I dati vengono estratti automaticamente.</div>
+    <textarea id="mprev-text" style="width:100%;height:200px;border:1px solid var(--border);border-radius:8px;padding:1rem;font-size:12px;font-family:monospace;background:var(--cream);color:var(--navy);resize:vertical;line-height:1.6" placeholder="Incolla qui il testo del report mensile del mese precedente..."></textarea>
+    <div class="brow">
+      <button class="btn btn-dark" onclick="estraiMPrev()">Estrai dati</button>
+      <button class="btn btn-out" onclick="document.getElementById('mprev-text').value=''">Cancella</button>
     </div>
-    <span class="fstatus" id="mfs-pprev">In attesa</span>
-    <div class="lbl" style="margin-top:.75rem">Excel (assicurati e altre aree)</div>
-    <div class="drop-zone"><input type="file" accept=".xlsx,.xls" onchange="onMXlsPrev(this)">
-      <span class="drop-icon">&#128202;</span>
-      <div class="drop-lbl">Export.xlsx mese precedente</div>
-      <div class="drop-hint">.xlsx</div>
-    </div>
-    <span class="fstatus" id="mfs-xprev">In attesa</span>
+    <span class="fstatus" id="mfs-pprev">In attesa del testo</span>
     <div class="lbl" style="margin-top:1rem">Verifica o modifica</div>
     <div class="row3">
       <div class="fld"><label>Totale</label><input type="number" id="mgp_tot" placeholder="0"></div>
@@ -418,7 +410,7 @@ body{font-family:Georgia,serif;background:var(--cream);color:var(--navy);min-hei
     </div>
     <div class="lbl">Per macroarea</div>
     <div id="mg-prev-aree"></div>
-    <div class="nfoot"><button class="btn btn-out" onclick="mgo(3)">Indietro</button><button class="btn btn-dark" onclick="mgo(4)">Avanti</button></div>
+    <div class="nfoot"><button class="btn btn-out" onclick="mgo(2)">Indietro</button><button class="btn btn-dark" onclick="mgo(4)">Avanti</button></div>
   </div>
 
   <!-- P4: Mese corrente - PDF + Excel -->
@@ -1098,7 +1090,7 @@ async function parsePdfBranca(file){
     for(var k=0;k<items.length;k++){var it2=items[k];var ky=Math.round(it2.y/5)*5;if(!rm[ky])rm[ky]=[];rm[ky].push(it2);}
     var rowArr=Object.values(rm).map(function(r){return r.sort(function(a,b){return a.x-b.x;}).map(function(i){return i.str;});});
     var bm=[{k:'ANALISI CLINICHE',a:'lab'},{k:'ANALISI',a:'lab'},{k:'ARCE',a:'fisio'},{k:'FISIOTERAPIA',a:'fisio'},{k:'POLIAMBULATORIO',a:'poli'},{k:'RADIOLOGIA2',a:'rad2'},{k:'RADIOLOGIA 2',a:'rad2'},{k:'RADIOLOGIA',a:'rad'}];
-    var res={lab:{tot:0,priv:0,ass:0},fisio:{tot:0,priv:0,ass:0},poli:{tot:0,priv:0,ass:0},rad:{tot:0,priv:0,ass:0},rad2:{tot:0,priv:0,ass:0},totale:{tot:0,priv:0,ass:0}};
+    var res={lab:{tot:0,priv:0,ass:0},fisio:{tot:0,priv:0,ass:0},poli:{tot:0,priv:0,ass:0},rad:{tot:0,priv:0,ass:0},rad2:{tot:0,priv:0,ass:0},totale:{tot:0,priv:0,ass:0}};var found={};
     for(var ri=0;ri<rowArr.length;ri++){
       var toks=rowArr[ri];
       try{
@@ -1109,7 +1101,7 @@ async function parsePdfBranca(file){
         if(!nums.length){var all=toks.join('').match(/\d+/g);if(all)all.forEach(function(v){nums.push(parseInt(v,10));});}
         if(!nums.length)continue;
         if(line.indexOf('TOTALI')===0||(line.indexOf('TOTALI')>=0&&line.indexOf('BRANCA')<0)){if(nums.length>=3){res.totale.tot=nums[nums.length-3];res.totale.priv=nums[nums.length-2];res.totale.ass=nums[nums.length-1];}continue;}
-        if(nums.length>=3){var ma=null;for(var bi=0;bi<bm.length;bi++){if(line.indexOf(bm[bi].k)>=0){ma=bm[bi].a;break;}}if(ma){res[ma].tot+=nums[nums.length-3];res[ma].priv+=nums[nums.length-2];res[ma].ass+=nums[nums.length-1];}}
+        if(nums.length>=3){var ma=null;for(var bi=0;bi<bm.length;bi++){if(line.indexOf(bm[bi].k)>=0){ma=bm[bi].a;break;}}if(ma&&!found[ma]){found[ma]=true;res[ma].tot=nums[nums.length-3];res[ma].priv=nums[nums.length-2];res[ma].ass=nums[nums.length-1];}}
       }catch(e){}
     }
     if(!res.totale.tot){for(var ai=0;ai<['lab','fisio','poli','rad','rad2'].length;ai++){var ak=['lab','fisio','poli','rad','rad2'][ai];res.totale.tot+=res[ak].tot;res.totale.priv+=res[ak].priv;res.totale.ass+=res[ak].ass;}}
@@ -1276,6 +1268,71 @@ var RAD2_M=new Set(['TAC CT','TAC TC']);
 function nm(s){return (s||'').toUpperCase().replace(/'/g,'').replace(/\s+/g,' ').trim();}
 function isFondo(l){return FONDI.has((l||'').toUpperCase().replace(/\s+/g,' ').trim());}
 function getArea(m){var v=nm(m);if(FISIO_M.has(v))return 'F';if(POLI_M.has(v))return 'P';if(RAD_M.has(v))return 'R';if(RAD2_M.has(v))return 'R2';return null;}
+
+function estraiPrev(){
+  var txt=document.getElementById('prev-audit-text').value.trim();
+  if(!txt){alert('Incolla prima il testo.');return;}
+  // Cerca "Settimana corrente" nel testo dell'audit precedente
+  // che diventa la nostra "settimana precedente"
+  var totM=txt.match(/TOTALI GENERALI[\s\S]{0,400}?Corrente[^\d]{0,10}([\d\.]+)[^\(]*\(Privati[^\d]{0,5}([\d\.]+)[^\)]*Assicurati[^\d]{0,5}([\d\.]+)/i);
+  if(!totM){
+    // Prova formato alternativo
+    totM=txt.match(/Corrente[^\d]{0,10}([\d\.]+)[^\(]*\(Privati[^\d]{0,5}([\d\.]+)[^\)]*Assicurati[^\d]{0,5}([\d\.]+)/i);
+  }
+  if(totM){
+    sv('pv_tot',parseInt(totM[1].replace(/\./g,'')));
+    sv('pv_priv',parseInt(totM[2].replace(/\./g,'')));
+    sv('pv_ass',parseInt(totM[3].replace(/\./g,'')));
+  }
+  function exA(name){
+    var i=txt.toUpperCase().indexOf(name);if(i<0)return null;
+    var blk=txt.substring(i,i+400);
+    var iC=blk.toLowerCase().indexOf('corrente');if(iC<0)return null;
+    var iP=blk.toLowerCase().indexOf('precedente');
+    var sl=blk.substring(iC,iP>iC?iP:iC+150);
+    var ns=[];(sl.match(/[\d\.]+/g)||[]).forEach(function(n){var v=parseInt(n.replace(/\./g,''));if(!isNaN(v))ns.push(v);});
+    return ns.length>=3?{tot:ns[0],priv:ns[1],ass:ns[2]}:null;
+  }
+  var aree=['LABORATORIO','FISIOTERAPIA','POLIAMBULATORIO','RADIOLOGIA 2','RADIOLOGIA'];
+  var ids=['lab','fisio','poli','rad2','rad'];
+  for(var i=0;i<aree.length;i++){
+    var d=exA(aree[i]);
+    if(d){sv('pv_'+ids[i]+'_t',d.tot);sv('pv_'+ids[i]+'_p',d.priv);sv('pv_'+ids[i]+'_a',d.ass);}
+  }
+  var tot=parseInt(document.getElementById('pv_tot').value)||0;
+  document.getElementById('fs-prev-text').textContent=tot?'OK - Tot:'+tot:'Dati estratti - verifica i valori';
+  document.getElementById('fs-prev-text').className='fstatus '+(tot?'ok':'err');
+}
+
+function estraiMPrev(){
+  var txt=document.getElementById('mprev-text').value.trim();
+  if(!txt){alert('Incolla prima il testo.');return;}
+  // Cerca i dati del mese corrente nel report del mese precedente
+  var totM=txt.match(/TOTALI GENERALI[\s\S]{0,400}?Corrente[^\d]{0,10}([\d\.]+)[^\(]*\(Privati[^\d]{0,5}([\d\.]+)[^\)]*Assicurati[^\d]{0,5}([\d\.]+)/i);
+  if(totM){
+    sv('mgp_tot',parseInt(totM[1].replace(/\./g,'')));
+    sv('mgp_priv',parseInt(totM[2].replace(/\./g,'')));
+    sv('mgp_ass',parseInt(totM[3].replace(/\./g,'')));
+  }
+  function exA(name){
+    var i=txt.toUpperCase().indexOf(name);if(i<0)return null;
+    var blk=txt.substring(i,i+400);
+    var iC=blk.toLowerCase().indexOf('corrente');if(iC<0)return null;
+    var iP=blk.toLowerCase().indexOf('precedente');
+    var sl=blk.substring(iC,iP>iC?iP:iC+150);
+    var ns=[];(sl.match(/[\d\.]+/g)||[]).forEach(function(n){var v=parseInt(n.replace(/\./g,''));if(!isNaN(v))ns.push(v);});
+    return ns.length>=3?{tot:ns[0],priv:ns[1],ass:ns[2]}:null;
+  }
+  var aree=['LABORATORIO','FISIOTERAPIA','POLIAMBULATORIO','RADIOLOGIA 2','RADIOLOGIA'];
+  var ids=['lab','fisio','poli','rad2','rad'];
+  for(var i=0;i<aree.length;i++){
+    var d=exA(aree[i]);
+    if(d){sv('mgp_'+ids[i]+'_t',d.tot);sv('mgp_'+ids[i]+'_p',d.priv);sv('mgp_'+ids[i]+'_a',d.ass);}
+  }
+  var tot=parseInt(document.getElementById('mgp_tot').value)||0;
+  document.getElementById('mfs-pprev').textContent=tot?'OK - Tot:'+tot:'Dati estratti - verifica i valori';
+  document.getElementById('mfs-pprev').className='fstatus '+(tot?'ok':'err');
+}
 // Carica librerie e avvia
 function loadScript(src){
   return new Promise(function(resolve){
