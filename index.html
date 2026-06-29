@@ -571,18 +571,27 @@ async function onXlsAree(inp){
     var buf=await f.arrayBuffer();var wb=XLSX.read(buf,{type:'array'});
     var rows=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{header:1});
     var hdr=rows[0].map(function(h){return (h||'').toString().toLowerCase();});
+    var cA=hdr.findIndex(function(h){return h.includes('assegnazione');});
     var cS=hdr.findIndex(function(h){return h.includes('stato');});
     var cM=hdr.findIndex(function(h){return h.includes('medic');});
     var cL=hdr.findIndex(function(h){return h.includes('listino');});
     if(cM<0||cL<0)throw new Error('Colonne non trovate');
-    var tot={F:0,P:0,R:0,R2:0},ass={F:0,P:0,R:0,R2:0};
+    var setTot={F:new Set(),P:new Set(),R:new Set(),R2:new Set()};
+    var setAss={F:new Set(),P:new Set(),R:new Set(),R2:new Set()};
     for(var i=1;i<rows.length;i++){
       var r=rows[i];if(!r)continue;
       if((r[cS]||'').toString().trim()==='Prenotata')continue;
       var area=getArea((r[cM]||'').toString());if(!area)continue;
-      tot[area]++;if(isFondo((r[cL]||'').toString()))ass[area]++;
+      var assegn=cA>=0?r[cA]:i;
+      setTot[area].add(assegn);
+      if(isFondo((r[cL]||'').toString()))setAss[area].add(assegn);
     }
-    FS.aree={fisio:{tot:tot.F,priv:tot.F-ass.F,ass:ass.F},poli:{tot:tot.P,priv:tot.P-ass.P,ass:ass.P},rad:{tot:tot.R,priv:tot.R-ass.R,ass:ass.R},rad2:{tot:tot.R2,priv:tot.R2-ass.R2,ass:ass.R2}};
+    FS.aree={
+      fisio:{tot:setTot.F.size,priv:setTot.F.size-setAss.F.size,ass:setAss.F.size},
+      poli:{tot:setTot.P.size,priv:setTot.P.size-setAss.P.size,ass:setAss.P.size},
+      rad:{tot:setTot.R.size,priv:setTot.R.size-setAss.R.size,ass:setAss.R.size},
+      rad2:{tot:setTot.R2.size,priv:setTot.R2.size-setAss.R2.size,ass:setAss.R2.size}
+    };
     var ar=FS.aree;
     sv('cu_fisio_t',ar.fisio.tot);sv('cu_fisio_p',ar.fisio.priv);sv('cu_fisio_a',ar.fisio.ass);
     sv('cu_poli_t',ar.poli.tot);sv('cu_poli_p',ar.poli.priv);sv('cu_poli_a',ar.poli.ass);
@@ -766,7 +775,7 @@ async function onMXlsLabCurr(inp){
 async function onMXlsCurr(inp){
   var f=inp.files[0];if(!f)return;if(typeof XLSX==='undefined'){alert('Excel non disponibile.');return;}
   setMStatus('mfs-xcurr','','Lettura...');
-  try{var buf=await f.arrayBuffer();var wb=XLSX.read(buf,{type:'array'});var rows=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{header:1});var hdr=rows[0].map(function(h){return (h||'').toString().toLowerCase();});var cS=hdr.findIndex(function(h){return h.includes('stato');});var cM=hdr.findIndex(function(h){return h.includes('medic');});var cL=hdr.findIndex(function(h){return h.includes('listino');});if(cM<0||cL<0)throw new Error('Colonne non trovate');var tot={F:0,P:0,R:0,R2:0},ass={F:0,P:0,R:0,R2:0};for(var i=1;i<rows.length;i++){var r=rows[i];if(!r)continue;if((r[cS]||'').toString().trim()==='Prenotata')continue;var area=getArea((r[cM]||'').toString());if(!area)continue;tot[area]++;if(isFondo((r[cL]||'').toString()))ass[area]++;}MFS.aree={fisio:{tot:tot.F,priv:tot.F-ass.F,ass:ass.F},poli:{tot:tot.P,priv:tot.P-ass.P,ass:ass.P},rad:{tot:tot.R,priv:tot.R-ass.R,ass:ass.R},rad2:{tot:tot.R2,priv:tot.R2-ass.R2,ass:ass.R2}};setMStatus('mfs-xcurr',true,'OK - Fisio:'+tot.F+' Poli:'+tot.P+' Rad:'+tot.R);aggiornaMenseCurr();}catch(e){setMStatus('mfs-xcurr',false,'Errore: '+e.message);}
+  try{var buf=await f.arrayBuffer();var wb=XLSX.read(buf,{type:'array'});var rows=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{header:1});var hdr=rows[0].map(function(h){return (h||'').toString().toLowerCase();});var cA=hdr.findIndex(function(h){return h.includes('assegnazione');});var cS=hdr.findIndex(function(h){return h.includes('stato');});var cM=hdr.findIndex(function(h){return h.includes('medic');});var cL=hdr.findIndex(function(h){return h.includes('listino');});if(cM<0||cL<0)throw new Error('Colonne non trovate');var setTot={F:new Set(),P:new Set(),R:new Set(),R2:new Set()};var setAss={F:new Set(),P:new Set(),R:new Set(),R2:new Set()};for(var i=1;i<rows.length;i++){var r=rows[i];if(!r)continue;if((r[cS]||'').toString().trim()==='Prenotata')continue;var area=getArea((r[cM]||'').toString());if(!area)continue;var assegn=cA>=0?r[cA]:i;setTot[area].add(assegn);if(isFondo((r[cL]||'').toString()))setAss[area].add(assegn);}MFS.aree={fisio:{tot:setTot.F.size,priv:setTot.F.size-setAss.F.size,ass:setAss.F.size},poli:{tot:setTot.P.size,priv:setTot.P.size-setAss.P.size,ass:setAss.P.size},rad:{tot:setTot.R.size,priv:setTot.R.size-setAss.R.size,ass:setAss.R.size},rad2:{tot:setTot.R2.size,priv:setTot.R2.size-setAss.R2.size,ass:setAss.R2.size}};setMStatus('mfs-xcurr',true,'OK - Fisio:'+setTot.F.size+' Poli:'+setTot.P.size+' Rad:'+setTot.R.size);aggiornaMenseCurr();}catch(e){setMStatus('mfs-xcurr',false,'Errore: '+e.message);}
 }
 
 function aggiornaMenseCurr(){
