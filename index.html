@@ -515,7 +515,7 @@ async function parsePdfBranca(file){
         if(!nums.length){var all=toks.join('').match(/\d+/g);if(all)all.forEach(function(v){nums.push(parseInt(v,10));});}
         if(!nums.length)continue;
         if(line.indexOf('TOTALI')===0||(line.indexOf('TOTALI')>=0&&line.indexOf('BRANCA')<0)){if(nums.length>=3){res.totale.tot=nums[nums.length-3];res.totale.priv=nums[nums.length-2];res.totale.ass=nums[nums.length-1];}continue;}
-        if(nums.length>=3){var ma=null;for(var bi=0;bi<bm.length;bi++){if(line.indexOf(bm[bi].k)>=0){ma=bm[bi].a;break;}}if(ma&&!found[ma]){found[ma]=true;res[ma].tot=nums[nums.length-3];res[ma].priv=nums[nums.length-2];res[ma].ass=nums[nums.length-1];}}
+        if(nums.length>=3){var ma=null;for(var bi=0;bi<bm.length;bi++){var kk=bm[bi].k;var ki=line.indexOf(kk);if(ki<0)continue;var ca=ki+kk.length<line.length?line.charAt(ki+kk.length):'';if(kk==='RADIOLOGIA'){if(ca==='2')continue;if(ca===' '){var ca2=ki+kk.length+1<line.length?line.charAt(ki+kk.length+1):'';if(ca2==='2'){var ca3=ki+kk.length+2<line.length?line.charAt(ki+kk.length+2):'';if(ca3===''||ca3===' ')continue;}}}if((kk==='RADIOLOGIA 2'||kk==='RADIOLOGIA2')&&ca>='0'&&ca<='9')continue;ma=bm[bi].a;break;}if(ma&&!found[ma]){found[ma]=true;res[ma].tot=nums[nums.length-3];res[ma].priv=nums[nums.length-2];res[ma].ass=nums[nums.length-1];}}
       }catch(e){}
     }
     if(!res.totale.tot){['lab','fisio','poli','rad','rad2'].forEach(function(ak){res.totale.tot+=res[ak].tot;res.totale.priv+=res[ak].priv;res.totale.ass+=res[ak].ass;});}
