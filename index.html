@@ -537,7 +537,7 @@ async function onPdfAnno(inp){
 async function onPdfLab(inp){
   var f=inp.files[0];if(!f)return;setDot('fs-plab','','Lettura...');
   var d=await parsePdfBranca(f);if(!d){setDot('fs-plab',false,'Errore lettura PDF');return;}
-  FS.labTot=d.lab.tot;setDot('fs-plab',true,'OK - Lab:'+d.lab.tot);aggiornaLabResult();
+  FS.labTot=d.lab.tot;FS.rad2FromPdf=d.rad2;setDot('fs-plab',true,'OK - Lab:'+d.lab.tot+' Rad2:'+d.rad2.tot);aggiornaLabResult();
 }
 
 async function onXlsLab(inp){
@@ -596,11 +596,11 @@ async function onXlsAree(inp){
     sv('cu_fisio_t',ar.fisio.tot);sv('cu_fisio_p',ar.fisio.priv);sv('cu_fisio_a',ar.fisio.ass);
     sv('cu_poli_t',ar.poli.tot);sv('cu_poli_p',ar.poli.priv);sv('cu_poli_a',ar.poli.ass);
     sv('cu_rad_t',ar.rad.tot);sv('cu_rad_p',ar.rad.priv);sv('cu_rad_a',ar.rad.ass);
-    sv('cu_rad2_t',ar.rad2.tot);sv('cu_rad2_p',ar.rad2.priv);sv('cu_rad2_a',ar.rad2.ass);
+    var r2w=FS.rad2FromPdf&&FS.rad2FromPdf.tot>0?FS.rad2FromPdf:ar.rad2;sv('cu_rad2_t',r2w.tot);sv('cu_rad2_p',r2w.priv);sv('cu_rad2_a',r2w.ass);
     var lt=FS.labTot||0,la=FS.labAss||0;
-    sv('cu_tot',lt+ar.fisio.tot+ar.poli.tot+ar.rad.tot+ar.rad2.tot);
-    sv('cu_priv',(lt-la)+ar.fisio.priv+ar.poli.priv+ar.rad.priv+ar.rad2.priv);
-    sv('cu_ass',la+ar.fisio.ass+ar.poli.ass+ar.rad.ass+ar.rad2.ass);
+    sv('cu_tot',lt+ar.fisio.tot+ar.poli.tot+ar.rad.tot+r2w.tot);
+    sv('cu_priv',(lt-la)+ar.fisio.priv+ar.poli.priv+ar.rad.priv+r2w.priv);
+    sv('cu_ass',la+ar.fisio.ass+ar.poli.ass+ar.rad.ass+r2w.ass);
     setDot('fs-xaree',true,'OK - Fisio:'+ar.fisio.tot+' Poli:'+ar.poli.tot+' Rad:'+ar.rad.tot+' Rad2:'+ar.rad2.tot);
   }catch(e){setDot('fs-xaree',false,'Errore: '+e.message);}
 }
