@@ -763,7 +763,7 @@ function estraiMPrev(){
 async function onMPdfCurr(inp){
   var f=inp.files[0];if(!f)return;setMStatus('mfs-pcurr','','Lettura...');
   var d=await parsePdfBranca(f);if(!d){setMStatus('mfs-pcurr',false,'Errore PDF');return;}
-  MFS.labTot=d.lab.tot;setMStatus('mfs-pcurr',true,'OK - Lab:'+d.lab.tot);aggiornaMenseCurr();
+  MFS.labTot=d.lab.tot;MFS.labAss=d.lab.ass;MFS.rad2FromPdf=d.rad2;setMStatus('mfs-pcurr',true,'OK - Lab:'+d.lab.tot+' Rad2:'+d.rad2.tot);aggiornaMenseCurr();
 }
 
 async function onMXlsLabCurr(inp){
@@ -780,7 +780,7 @@ async function onMXlsCurr(inp){
 
 function aggiornaMenseCurr(){
   if(MFS.labTot!==null&&MFS.labAss!==null){var lp=MFS.labTot-MFS.labAss;sv('mgc_lab_t',MFS.labTot);sv('mgc_lab_p',lp);sv('mgc_lab_a',MFS.labAss);}
-  if(MFS.aree){var ar=MFS.aree;sv('mgc_fisio_t',ar.fisio.tot);sv('mgc_fisio_p',ar.fisio.priv);sv('mgc_fisio_a',ar.fisio.ass);sv('mgc_poli_t',ar.poli.tot);sv('mgc_poli_p',ar.poli.priv);sv('mgc_poli_a',ar.poli.ass);sv('mgc_rad_t',ar.rad.tot);sv('mgc_rad_p',ar.rad.priv);sv('mgc_rad_a',ar.rad.ass);sv('mgc_rad2_t',ar.rad2.tot);sv('mgc_rad2_p',ar.rad2.priv);sv('mgc_rad2_a',ar.rad2.ass);if(MFS.labTot!==null){var lt=MFS.labTot,la=MFS.labAss||0;sv('mgc_tot',lt+ar.fisio.tot+ar.poli.tot+ar.rad.tot+ar.rad2.tot);sv('mgc_priv',(lt-la)+ar.fisio.priv+ar.poli.priv+ar.rad.priv+ar.rad2.priv);sv('mgc_ass',la+ar.fisio.ass+ar.poli.ass+ar.rad.ass+ar.rad2.ass);}}
+  if(MFS.aree){var ar=MFS.aree;sv('mgc_fisio_t',ar.fisio.tot);sv('mgc_fisio_p',ar.fisio.priv);sv('mgc_fisio_a',ar.fisio.ass);sv('mgc_poli_t',ar.poli.tot);sv('mgc_poli_p',ar.poli.priv);sv('mgc_poli_a',ar.poli.ass);sv('mgc_rad_t',ar.rad.tot);sv('mgc_rad_p',ar.rad.priv);sv('mgc_rad_a',ar.rad.ass);var r2=MFS.rad2FromPdf&&MFS.rad2FromPdf.tot>0?MFS.rad2FromPdf:ar.rad2;sv('mgc_rad2_t',r2.tot);sv('mgc_rad2_p',r2.priv);sv('mgc_rad2_a',r2.ass);if(MFS.labTot!==null){var lt=MFS.labTot,la=MFS.labAss||0;sv('mgc_tot',lt+ar.fisio.tot+ar.poli.tot+ar.rad.tot+r2.tot);sv('mgc_priv',(lt-la)+ar.fisio.priv+ar.poli.priv+ar.rad.priv+r2.priv);sv('mgc_ass',la+ar.fisio.ass+ar.poli.ass+ar.rad.ass+r2.ass);}}
 }
 
 function buildMGRiep(){
